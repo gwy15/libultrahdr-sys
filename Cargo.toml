@@ -6,6 +6,7 @@ links = "ultrahdr"
 description = "A Rust interface to libultrahdr"
 keywords = ["libultrahdr", "image", "hdr"]
 categories = ["multimedia", "multimedia::encoding", "multimedia::images", "external-ffi-bindings"]
+license = "Apache-2.0"
 
 [dependencies]
 
