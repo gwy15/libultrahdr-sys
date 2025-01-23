@@ -1,15 +1,11 @@
 [package]
 name = "libultrahdr-sys"
-version = "0.1.0-alpha.1"
+version = "0.1.0"
 edition = "2021"
 links = "ultrahdr"
 description = "A Rust interface to libultrahdr"
 keywords = ["libultrahdr", "image", "hdr"]
 categories = ["multimedia", "multimedia::encoding", "multimedia::images", "external-ffi-bindings"]
-
-[[example]]
-name = "example"
-path = "example/example.rs"
 
 [dependencies]
 

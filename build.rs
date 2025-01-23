@@ -1,73 +1,57 @@
 use std::env;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
-const ENV_STATIC: &str = "ULTRAHDR_STATIC";
-const LIB_PATH: &str = "ULTRAHDR_LIB_PATH";
+const LIB_PATH_ENV: &str = "ULTRAHDR_LIB_PATH";
+const HEADER_ENV: &str = "ULTRAHDR_HEADER";
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
 
-    let default_static = false;
-    let static_build = match env::var(ENV_STATIC) {
-        Ok(val) => val.parse().unwrap_or(default_static),
-        Err(_) => default_static,
-    };
-
-    find_installed_lib(static_build);
+    find_installed_lib();
 
     // TODO: build from source?
-
-    if static_build {
-        println!("cargo:rustc-link-lib=static=uhdr");
-        println!("cargo:rustc-link-lib=static=jpeg");
-    } else {
-        println!("cargo:rustc-link-lib=uhdr");
-        println!("cargo:rustc-link-lib=jpeg");
-    }
 }
 
-fn find_installed_lib(static_build: bool) {
-    if let Ok(path) = env::var(LIB_PATH) {
+fn find_installed_lib() {
+    if let Ok(path) = env::var(LIB_PATH_ENV) {
         println!("cargo::rustc-link-search=native={}", path);
+        println!("cargo::rustc-link-lib=static=uhdr");
+        let header = env::var(HEADER_ENV)
+            .expect(format!("{} set, but {} not set", LIB_PATH_ENV, HEADER_ENV).as_str());
+        bindgen(&PathBuf::from(header));
         return;
     }
 
     #[cfg(not(target_os = "windows"))]
-    let find_result = pkg_config::Config::new()
-        .statik(static_build)
-        .probe("libjpeg");
+    pkg_config::Config::new().probe("libjpeg").unwrap();
     #[cfg(target_os = "windows")]
-    let find_result = vcpkg::find_package("jpeg");
-    let lib = find_result.unwrap();
-    for path in lib.link_paths {
-        println!("cargo::rustc-link-search=native={}", path.display());
-    }
+    vcpkg::find_package("libjpeg-turbo").unwrap();
 
     #[cfg(not(target_os = "windows"))]
-    let find_result = pkg_config::Config::new()
-        .statik(static_build)
-        .probe("libuhdr");
+    let find_result = pkg_config::Config::new().probe("libuhdr");
     #[cfg(target_os = "windows")]
     let find_result = vcpkg::find_package("uhdr");
     let lib = find_result.unwrap();
-    // link path
-    for path in lib.link_paths {
-        println!("cargo::rustc-link-search=native={}", path.display());
-    }
 
     // bindgen
-    let mut header = None;
-    for path in lib.include_paths {
-        let ideal_header = path.join("ultrahdr_api.h");
-        if ideal_header.exists() {
-            header = Some(ideal_header);
-            break;
+    let mut header = std::env::var(HEADER_ENV).ok().map(Into::into);
+    if header.is_none() {
+        for path in lib.include_paths {
+            let ideal_header = path.join("ultrahdr_api.h");
+            if ideal_header.exists() {
+                header = Some(ideal_header);
+                break;
+            }
         }
     }
     let Some(header) = header else {
         println!("cargo:warning=uhdr_api.h not found");
         std::process::exit(1);
     };
+    bindgen(&header);
+}
+
+fn bindgen(header: &Path) {
     let outdir = std::env::var("OUT_DIR").unwrap();
     let output = PathBuf::from(outdir).join("bindings.rs");
     bindgen::Builder::default()
