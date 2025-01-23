@@ -19,8 +19,10 @@ fn main() {
 
     if static_build {
         println!("cargo:rustc-link-lib=static=uhdr");
+        println!("cargo:rustc-link-lib=static=jpeg");
     } else {
         println!("cargo:rustc-link-lib=uhdr");
+        println!("cargo:rustc-link-lib=jpeg");
     }
 }
 
@@ -29,6 +31,18 @@ fn find_installed_lib(static_build: bool) {
         println!("cargo::rustc-link-search=native={}", path);
         return;
     }
+
+    #[cfg(not(target_os = "windows"))]
+    let find_result = pkg_config::Config::new()
+        .statik(static_build)
+        .probe("libjpeg");
+    #[cfg(target_os = "windows")]
+    let find_result = vcpkg::find_package("jpeg");
+    let lib = find_result.unwrap();
+    for path in lib.link_paths {
+        println!("cargo::rustc-link-search=native={}", path.display());
+    }
+
     #[cfg(not(target_os = "windows"))]
     let find_result = pkg_config::Config::new()
         .statik(static_build)
@@ -36,11 +50,11 @@ fn find_installed_lib(static_build: bool) {
     #[cfg(target_os = "windows")]
     let find_result = vcpkg::find_package("uhdr");
     let lib = find_result.unwrap();
-
     // link path
     for path in lib.link_paths {
         println!("cargo::rustc-link-search=native={}", path.display());
     }
+
     // bindgen
     let mut header = None;
     for path in lib.include_paths {
@@ -58,6 +72,9 @@ fn find_installed_lib(static_build: bool) {
     let output = PathBuf::from(outdir).join("bindings.rs");
     bindgen::Builder::default()
         .header(header.to_str().unwrap().to_string())
+        .default_enum_style(bindgen::EnumVariation::Rust {
+            non_exhaustive: true,
+        })
         .generate()
         .unwrap()
         .write_to_file(output)
