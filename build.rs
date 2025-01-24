@@ -1,8 +1,9 @@
 use std::env;
 use std::path::{Path, PathBuf};
 
-const LIB_PATH_ENV: &str = "ULTRAHDR_LIB_PATH";
-const HEADER_ENV: &str = "ULTRAHDR_HEADER";
+const LIB_PATH_ENV: &str = "UHDR_LIB_PATH";
+const HEADER_ENV: &str = "UHDR_HEADER";
+const STATIC_ENV: &str = "UHDR_STATIC";
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
@@ -15,7 +16,11 @@ fn main() {
 fn find_installed_lib() {
     if let Ok(path) = env::var(LIB_PATH_ENV) {
         println!("cargo::rustc-link-search=native={}", path);
-        println!("cargo::rustc-link-lib=static=uhdr");
+        if env::var(STATIC_ENV).is_ok() {
+            println!("cargo::rustc-link-lib=static=uhdr");
+        } else {
+            println!("cargo::rustc-link-lib=uhdr");
+        }
         let header = env::var(HEADER_ENV)
             .expect(format!("{} set, but {} not set", LIB_PATH_ENV, HEADER_ENV).as_str());
         bindgen(&PathBuf::from(header));

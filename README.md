@@ -12,8 +12,8 @@ either use `pkg-config` use automatically find libultrahdr, or
 
 set environment variables to skip `pkg-config` search.
 ```
-ULTRAHDR_LIB_PATH=/path/to/lib
-ULTRAHDR_HEADER=/path/to/uhdr_api.h
+UHDR_LIB_PATH=/path/to/lib
+UHDR_HEADER=/path/to/uhdr_api.h
 ```
 
 [instruction]: https://github.com/google/libultrahdr/blob/main/docs/building.md
