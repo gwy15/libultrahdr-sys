@@ -21,8 +21,10 @@ fn find_installed_lib() {
         println!("cargo::rustc-link-search=native={}", path);
         if env::var(STATIC_ENV).is_ok() {
             println!("cargo::rustc-link-lib=static=uhdr");
+            println!("cargo::rustc-link-lib=static=jpeg");
         } else {
             println!("cargo::rustc-link-lib=uhdr");
+            println!("cargo::rustc-link-lib=jpeg");
         }
         let header = env::var(HEADER_ENV)
             .expect(format!("{} set, but {} not set", LIB_PATH_ENV, HEADER_ENV).as_str());
