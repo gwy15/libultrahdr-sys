@@ -27,8 +27,9 @@ fn find_installed_lib() {
         return;
     }
 
+    // pkg-config --libs --cflags uhdr, includes -luhdr and -ljpeg
     #[cfg(not(target_os = "windows"))]
-    let find_result = pkg_config::Config::new().probe("uhdr");
+    let find_result = pkg_config::Config::new().probe("libuhdr");
     #[cfg(target_os = "windows")]
     let find_result = vcpkg::find_package("uhdr");
     let lib = find_result.unwrap();
