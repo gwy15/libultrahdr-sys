@@ -14,6 +14,7 @@ set environment variables to skip `pkg-config` search.
 ```
 UHDR_LIB_PATH=/path/to/lib
 UHDR_HEADER=/path/to/uhdr_api.h
+UHDR_STATIC=1
 ```
 
 [instruction]: https://github.com/google/libultrahdr/blob/main/docs/building.md
