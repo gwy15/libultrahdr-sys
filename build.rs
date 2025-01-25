@@ -7,6 +7,9 @@ const STATIC_ENV: &str = "UHDR_STATIC";
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
+    println!("cargo:rerun-if-env-changed={}", LIB_PATH_ENV);
+    println!("cargo:rerun-if-env-changed={}", HEADER_ENV);
+    println!("cargo:rerun-if-env-changed={}", STATIC_ENV);
 
     find_installed_lib();
 
