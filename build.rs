@@ -28,12 +28,7 @@ fn find_installed_lib() {
     }
 
     #[cfg(not(target_os = "windows"))]
-    pkg_config::Config::new().probe("libjpeg").unwrap();
-    #[cfg(target_os = "windows")]
-    vcpkg::find_package("libjpeg-turbo").unwrap();
-
-    #[cfg(not(target_os = "windows"))]
-    let find_result = pkg_config::Config::new().probe("libuhdr");
+    let find_result = pkg_config::Config::new().probe("uhdr");
     #[cfg(target_os = "windows")]
     let find_result = vcpkg::find_package("uhdr");
     let lib = find_result.unwrap();
