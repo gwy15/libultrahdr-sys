@@ -8,6 +8,7 @@ keywords = ["libultrahdr", "image", "hdr"]
 categories = ["multimedia", "multimedia::encoding", "multimedia::images", "external-ffi-bindings"]
 license = "Apache-2.0"
 documentation = "https://docs.rs/libultrahdr-sys"
+repository = "https://github.com/gwy15/libultrahdr-sys"
 
 [dependencies]
 
